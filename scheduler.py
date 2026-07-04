@@ -27,7 +27,7 @@ def check_and_send_email_reminders():
     cursor = conn.cursor()
     query = """
         SELECT topic_name, stage FROM revisions 
-        WHERE (date_1_day = %s OR date_7_day = %s OR date_30_day = %s) 
+        WHERE ((date_1_day = %s) OR (date_7_day = %s) OR (date_30_day = %s)) 
         AND current_status = 'Active';
     """
     cursor.execute(query, (today_str, today_str, today_str))
@@ -41,9 +41,9 @@ def check_and_send_email_reminders():
         return
         
     # 4. Craft Beautiful Email HTML/Text Body
-    email_sender = os.getenv("SENDER_EMAIL")       # Aapka Gmail ID
-    email_receiver = os.getenv("RECEIVER_EMAIL")   # Jispar notification chahiye (Aapka personal email)
-    app_password = os.getenv("GMAIL_APP_PASSWORD") # Google App Password
+    email_sender = os.getenv("SENDER_EMAIL")       
+    email_receiver = os.getenv("RECEIVER_EMAIL")   
+    app_password = os.getenv("GMAIL_APP_PASSWORD") 
     
     if not all([email_sender, email_receiver, app_password]):
         print("❌ Error: Email credentials missing in GitHub Secrets.")
@@ -64,7 +64,7 @@ def check_and_send_email_reminders():
     # 5. Connect to Gmail Server and Send
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls() # Secure connection encryption
+        server.starttls() # Ekdam sahi spelling (l hai, 1 nahi)
         server.login(email_sender, app_password)
         server.sendmail(email_sender, email_receiver, msg.as_string())
         server.quit()
