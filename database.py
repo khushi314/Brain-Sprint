@@ -3,17 +3,26 @@ import streamlit as st
 import datetime
 
 def get_connection():
-    """
-    Neon PostgreSQL Cloud Database se secure connection leta hai.
-    Streamlit secrets (.streamlit/secrets.toml) se URL string padhega.
-    """
-    # Streamlit .io aur GitHub Actions dono jagah se 'DB_CONNECT_STRING' environment variable ban kar read hoga
-    if"DB_CONNECT_STRING" in st.secrets:
-        return psycopg2.connect(st.secrets["DB_CONNECT_STRING"])
-    else:
-        import os
-        return psycopg2.connect(os.getenv("DB_CONNECT_STRING","YOUR_FALLING_STRING_IF_NEEDED"))
+    import os
+    import streamlit as str_config  
     
+    
+    db_url = os.getenv("DB_CONNECT_STRING")
+    
+    
+    if not db_url:
+        try:
+            import streamlit as st
+            db_url = st.secrets["DB_CONNECT_STRING"]
+        except Exception:
+            pass
+            
+    if not db_url:
+        raise ValueError("❌ Error: DB_CONNECT_STRING nahi mili! Na GitHub Secrets me na secrets.toml me.")
+        
+    import psycopg2
+    return psycopg2.connect(db_url)
+
 
 def init_db():
     """
