@@ -116,7 +116,7 @@ def log_progress(topic_name, score, total_qs):
     cursor.close()
     conn.close()
 
-# Automatic startup script wrapper to create tables instantly if they don't exist
+
 try:
     init_db()
 except Exception as e:
@@ -130,7 +130,7 @@ def get_quiz_accuracies():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        # Sabse purane se lekar naye quiz tak ki accuracy select karega
+        # select accuracy from older to new
         cursor.execute("SELECT accuracy_percentage FROM quiz_performance ORDER BY id ASC;")
         rows = cursor.fetchall()
         cursor.close()
@@ -163,7 +163,7 @@ def get_reminder_time():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT remainder_time  FROM user_settings LIMIT 1;") 
-    row = cursor.fetchone
+    row = cursor.fetchone()
     cursor.close()
     conn.close()
     return row[0] if row else"06:00"
