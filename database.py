@@ -8,7 +8,7 @@ def get_connection():
     Streamlit secrets (.streamlit/secrets.toml) se URL string padhega.
     """
     # Streamlit .io aur GitHub Actions dono jagah se 'DB_CONNECT_STRING' environment variable ban kar read hoga
-    if"DB_CONNNECT_STRING" in st.secrets:
+    if"DB_CONNECT_STRING" in st.secrets:
         return psycopg2.connect(st.secrets["DB_CONNECT_STRING"])
     else:
         import os
