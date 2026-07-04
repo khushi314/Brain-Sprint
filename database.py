@@ -162,7 +162,7 @@ def update_reminder_time(new_time_str):
 def get_reminder_time():
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT reminder_time  FROM user_settings LIMIT 1;") 
+    cursor.execute("SELECT remainder_time  FROM user_settings LIMIT 1;") 
     row = cursor.fetchone
     cursor.close()
     conn.close()
