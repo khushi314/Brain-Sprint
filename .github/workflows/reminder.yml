@@ -1,0 +1,33 @@
+name: Hourly Email Reminder Engine
+
+on:
+  schedule:
+    - cron: '5 * * * *' # Har ghante ke 5th minute par chalega automatically
+  workflow_dispatch: # Manual test button
+
+jobs:
+  run-reminder-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install psycopg2-binary pytz streamlit
+
+    - name: Execute Reminder Script
+      env:
+        DB_CONNECT_STRING: ${{ secrets.DB_CONNECT_STRING }}
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      run: |
+        python scheduler.py
