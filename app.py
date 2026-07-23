@@ -113,13 +113,20 @@ if page == "🏠 Home Dashboard":
             inp_yesterday = st.text_input("⏱️ Enter your yesterday's topic (24h due):", value=st.session_state.stored_yesterday, placeholder="e.g., AVL Tree Insertions")
             inp_7days = st.text_input("📅 Enter topic covered 7 days earlier:", value=st.session_state.stored_7day, placeholder="e.g., Queue Protocols")
                     
+            
+            
+            
             rem_clock = st.time_input("🔔 Permanent Reminder Trigger Clock Slot:", datetime.time(20, 0))
-            try:
-                formatted_time= rem_clock.strftime("%H:%M")
-                db.update_reminder_time(formatted_time)
-                st.caption(f"Auto-Synced to cloud: Reminders active for hour{formatted_time}IST")
-            except Exception as db_err:
-                st.caption(f"Cloud sync pending....({db_err})")
+            if rem_clock:
+                try:
+                    formatted_time = rem_clock.strftime("%H:%M")
+                    db.update_reminder_time(formatted_time)
+                    st.caption(f"cloud synced:reminders active for hour {formatted_time} IST")
+                    
+        
+                except Exception as db_err:
+                    st.caption(f"Cloud sync pending....({db_err})")
+
 
 
             sync_trigger = st.button("Sync Data & Activate Timeline ⚡", use_container_width=True, type="primary")
@@ -155,34 +162,79 @@ elif page == "📅 Remainder Matrix":
     col_rem_left, col_rem_right = st.columns([5, 4])
     
     with col_rem_left:
-        # Stage 1 Card
-        s1_val = st.session_state.stored_yesterday if st.session_state.stored_yesterday else "No topic due for 24h revision today."
-        st.markdown(f"""
-        <div class="tight-glass-panel" style="margin-bottom: 15px;">
-            <h4 style="color: #ff007f; margin:0; font-weight:bold;">🚨 Stage 1: After 24 Hour Revision Slot</h4>
-            <p style="font-size: 22px; font-weight: bold; margin-top: 12px; color: #ffffff;">📌 {s1_val}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.button("⏰ Launch 10 Minutes Focus Countdown Clock", key="c_10", use_container_width=True)
-            
-        # Stage 2 Card
-        s2_val = st.session_state.stored_7day if st.session_state.stored_7day else "No topic due for 7d revision today."
-        st.markdown(f"""
-        <div class="tight-glass-panel" style="margin-bottom: 15px;">
-            <h4 style="color: #7f00ff; margin:0; font-weight:bold;">⏱️ Stage 2: After 7 Day Revision Slot</h4>
-            <p style="font-size: 22px; font-weight: bold; margin-top: 12px; color: #ffffff;">📌 {s2_val}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.button("⏰ Launch 15 Minutes Focus Countdown Clock", key="c_15_1", use_container_width=True)
+        if "active_timer_key" not in st.session_state:
+            st.session_state.active_timer_key = None
+        if "timer_secs_left" not in st.session_state:
+            st.session_state.timer_secs_left = 0
 
-        # Stage 3 Card
-        st.markdown(f"""
-        <div class="tight-glass-panel" style="margin-bottom: 15px;">
-            <h4 style="color: #00f0ff; margin:0; font-weight:bold;">🏆 Stage 3: After 30 Days Memory Lock Slot</h4>
-            <p style="font-size: 22px; font-weight: bold; margin-top: 12px; color: #ffffff;">📌 All Clear! No topic due for 30 Days memory lock today.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.button("⏰ Launch 15 Minutes Master Countdown Clock", key="c_15_2", use_container_width=True)
+    # # Stage 1 Card
+    s1_val = st.session_state.stored_yesterday if st.session_state.stored_yesterday else "No topic due for 24h revision today."
+    st.markdown(f"""
+    <div class="tight-glass-panel" style="margin-bottom: 15px;">
+        <h4 style="color: #ff007f; margin:0; font-weight:bold;">🚨 Stage 1: After 24 Hour Revision Slot</h4>
+        <p style="font-size: 22px; font-weight: bold; margin-top: 12px; color: #ffffff;">📌 {s1_val}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Timer 1: 10 Min Focus
+    if st.button("⏰ Launch 10 Minutes Focus Countdown Clock", key="c_10", use_container_width=True):
+        st.session_state.active_timer_key = "c_10"
+        st.session_state.timer_secs_left = 600
+        st.rerun()
+
+    if st.session_state.active_timer_key == "c_10":
+        m, s = divmod(st.session_state.timer_secs_left, 60)
+        st.info(f"⏱️ **10-Min Focus Timer:** `{m:02d}:{s:02d}`")
+
+
+    # # Stage 2 Card
+    s2_val = st.session_state.stored_7day if st.session_state.stored_7day else "No topic due for 7d revision today."
+    st.markdown(f"""
+    <div class="tight-glass-panel" style="margin-bottom: 15px;">
+        <h4 style="color: #7f00ff; margin:0; font-weight:bold;">🍇 Stage 2: After 7 Day Revision Slot</h4>
+        <p style="font-size: 22px; font-weight: bold; margin-top: 12px; color: #ffffff;">📌 {s2_val}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Timer 2: 15 Min Focus
+    if st.button("⏰ Launch 15 Minutes Focus Countdown Clock", key="c_15_1", use_container_width=True):
+        st.session_state.active_timer_key = "c_15_1"
+        st.session_state.timer_secs_left = 900
+        st.rerun()
+
+    if st.session_state.active_timer_key == "c_15_1":
+        m, s = divmod(st.session_state.timer_secs_left, 60)
+        st.info(f"⏱️ **15-Min Focus Timer:** `{m:02d}:{s:02d}`")
+
+
+    # # Stage 3 Card
+    st.markdown("""
+    <div class="tight-glass-panel" style="margin-bottom: 15px;">
+        <h4 style="color: #00feff; margin:0; font-weight:bold;">🏆 Stage 3: After 30 Days Memory Lock Slot</h4>
+        <p style="font-size: 22px; font-weight: bold; margin-top: 12px; color: #ffffff;">📌 All Clear! No topic due for 30 Days</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Timer 3: 15 Min Master
+    if st.button("⏰ Launch 15 Minutes Master Countdown Clock", key="c_15_2", use_container_width=True):
+        st.session_state.active_timer_key = "c_15_2"
+        st.session_state.timer_secs_left = 900
+        st.rerun()
+
+    if st.session_state.active_timer_key == "c_15_2":
+        m, s = divmod(st.session_state.timer_secs_left, 60)
+        st.info(f"⏱️ **15-Min Master Timer:** `{m:02d}:{s:02d}`")
+
+
+    # --- AUTOMATIC SECOND TICKER FOR ACTIVE TIMER ---
+    if st.session_state.active_timer_key and st.session_state.timer_secs_left > 0:
+        time.sleep(1)
+        st.session_state.timer_secs_left -= 1
+        st.rerun()
+    elif st.session_state.active_timer_key and st.session_state.timer_secs_left == 0:
+        st.session_state.active_timer_key = None
+        st.balloons()
+        st.success("🎉 **Focus Session Time Completed!**")
 
 # ==========================================
 # 📝 PAGE 3: QUIZ ARENA (🚀 REAL AI CALL INTEGRATION)
@@ -277,86 +329,97 @@ elif page == "📝 Quiz Arena":
                 st.rerun()
 
     # ---- EVALUATION REPORT DISPLAY BLOCK ----
-    # Yeh tabhi chalega jab user submit kar chuka hoga (quiz_results_show == True)
-    if st.session_state.get("quiz_results_show", False):
-        correct_count = 0
-        st.markdown("### 📊 Your Quiz Evaluation Report")
-        
-        for i, q_item in enumerate(st.session_state.quiz_questions):
-            # Safe indexing check for user answers dictionary/list
-            user_ans = st.session_state.user_answers.get(i, "Not Answered") if isinstance(st.session_state.user_answers, dict) else st.session_state.user_answers[i]
-            actual_ans = q_item.get("answer", q_item.get("correct_answer", ""))
-            
-            st.write(f"**Q{i+1}: {q_item['question']}**")
-            
-            if user_ans == actual_ans:
-                st.success(f"🟢 **Correct Answer!** You chose: {user_ans}")
-                correct_count += 1
-            else:
-                st.error(f"🔴 **Wrong Answer!** You chose: {user_ans}")
-                st.info(f"💡 **Correct Choice:** {actual_ans}")
-                
-                # 🧠 Short Theory Description Feature
-                explanation = q_item.get("explanation", q_item.get("description", "Review the core concepts of this specific topic matrix in your study logs."))
-                st.caption(f"📖 *Quick Revision Theory:* {explanation}")
-            st.markdown("---")
-            
-        # --- NEON CLOUD DATABASE SYNC ENGINE ---
-        # Ek baar run hone ke baad hi loop database me push karega
-        if not st.session_state.get("db_synced_this_run", False):
-            try:
-                db.log_progress(target_q_topic, correct_count, len(st.session_state.quiz_questions))
-                
-                if "quiz_accuracy_vector" not in st.session_state:
-                    st.session_state.quiz_accuracy_vector = []
-                    
-                current_acc = int((correct_count / len(st.session_state.quiz_questions)) * 100)
-                st.session_state.quiz_accuracy_vector.append(current_acc)
-                
-                st.session_state.db_synced_this_run = True
-                st.success("🎯 Exam Submitted & Performance Synced with Neon Cloud!")
-                st.rerun()
-                
-            except Exception as log_error:
-                st.warning(f"Sync Notice: Graph cached in temporary session memory ({log_error})")
+if st.session_state.get("quiz_results_show", False):
+    correct_count = 0
+    st.markdown("### 📊 Your Quiz Evaluation Report")
 
+    # Clean display without confusing 'You chose' state mismatches
+    for i, q_item in enumerate(st.session_state.quiz_questions):
+        q_text = q_item.get("question", "")
+        actual_ans = q_item.get("answer") or q_item.get("correct_answer") or ""
+        explanation = q_item.get("explanation", q_item.get("description", "Review the core concepts."))
+
+        st.write(f"**Q{i+1}: {q_text}**")
+        st.info(f"💡 **Correct Choice:** {actual_ans}")
+        st.caption(f"📖 *Quick Revision Theory:* {explanation}")
+        st.markdown("---")
+
+    # --- NEON CLOUD DATABASE SYNC ENGINE (4 Spaces) ---
+    # Ek baar run hone ke baad hi loop database me push karega
+    if not st.session_state.get("db_synced_this_run", False):
+        try:
+            db.log_progress(target_q_topic, correct_count, len(st.session_state.quiz_questions))
+
+            if "quiz_accuracy_vector" not in st.session_state:
+                st.session_state.quiz_accuracy_vector = []
+
+            current_acc = int((correct_count / len(st.session_state.quiz_questions)) * 100)
+            st.session_state.quiz_accuracy_vector.append(current_acc)
+
+            st.session_state.db_synced_this_run = True
+            st.success("🎯 Exam Submitted & Performance Synced with Neon Cloud!")
+            st.rerun()
+
+        except Exception as log_error:
+            st.warning(f"Sync Notice: Graph cached in temporary session memory ({log_error})")
+    
 # ==========================================
 # 📈 PERFORMANCE TRACKER VIEW
 # ==========================================
-elif page == "📈 Performance Tracker":
-    st.markdown("<h2 style='color: #00f0ff; font-weight:900;'>📈 Progress Analytics Dashboard</h2>", unsafe_allow_html=True)
+elif "Performance Tracker" in page:
+    st.markdown("<h2 style='color: #00feff; font-weight:900;'>📊 Real-Time Revision History & Analytics</h2>", unsafe_allow_html=True)
     st.divider()
-    
-    # 🔌 CALCULATING METRICS FROM REAL DB SNAPSHOT
-    total_db_records = 0
+
+    # --- 1. REAL DATABASE FETCH (NEON / SQLITE REAL DATA ONLY) ---
+    all_revisions = []
     try:
-        # Fits both PostgreSQL / SQLite structures interchangeably
-        import sqlite3
-        conn = sqlite3.connect("brainsprint.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM revisions")
-        total_db_records = cursor.fetchone()[0]
-        conn.close()
+        # Assuming db.get_all_revisions() or direct query fetches real rows from DB
+        all_revisions = db.get_all_revisions()  # Expects list of dicts/tuples with created_at, topic, score
     except Exception:
-        if st.session_state.stored_today: total_db_records += 1
-        if st.session_state.stored_yesterday: total_db_records += 1
-        if st.session_state.stored_7day: total_db_records += 1
-        
-    st.markdown(f"""
-    <div class="tight-glass-panel" style="margin-bottom: 20px;">
-        <h3 style="color: #ff007f; margin:0; font-weight:bold;">📋 Live Metric Analytics Dashboard</h3>
-        <p style="color: #e2e2e9; font-size:16px; margin-top:10px;">
-            • Total Registered System Logs: <b>{total_db_records} Topics currently monitored</b>.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        # Session state fallback only if DB fails temporarily
+        all_revisions = st.session_state.get("real_db_revisions", [])
+
+    total_topics = len(all_revisions)
     
-    m1, m2, m3 = st.columns(3)
-    m1.metric(label="Active Revision Sprints", value=f"{total_db_records} Sessions")
-    m2.metric(label="Average Evaluation Accuracy", value="92.4%" if total_db_records > 0 else "0.0%")
-    m3.metric(label="Current Practice Streak", value="1 Day" if total_db_records > 0 else "0 Days")
+    # Calculate real overall average accuracy
+    scores_list = [r.get("accuracy", 0) for r in all_revisions if "accuracy" in r] if isinstance(all_revisions, list) else []
+    overall_avg = int(sum(scores_list) / len(scores_list)) if scores_list else 0
     
+    # Unique active days calculation for real streak
+    unique_days = len(set([str(r.get("created_at", "")).split()[0] for r in all_revisions if "created_at" in r])) if all_revisions else 0
+
+    # --- 2. DYNAMIC REAL METRIC CARDS ---
+    col1, col2, col3 = st.columns(3)
+    col1.metric(label="🔥 Active Revision Days", value=f"{unique_days} Days")
+    col2.metric(label="🎯 Overall Average Accuracy", value=f"{overall_avg}%")
+    col3.metric(label="📚 Total Quizzes Monitored", value=f"{total_topics} Topics")
+
     st.divider()
-    st.markdown("#### 📈 Memory Retention Vector Curve Graph")
-    real_scores = db.get_quiz_accuracies()
-    st.line_chart(real_scores)
+
+    # --- 3. DAY-WISE EXPANDABLE QUIZ HISTORY (REAL DATA GROUPING) ---
+    st.markdown("### 📅 Date-Wise Quiz History & Scores")
+
+    if all_revisions and isinstance(all_revisions, list) and len(all_revisions) > 0:
+        # Group entries by date
+        grouped_history = {}
+        for item in all_revisions:
+            raw_date = str(item.get("created_at", "Unknown Date")).split()[0]
+            if raw_date not in grouped_history:
+                grouped_history[raw_date] = []
+            grouped_history[raw_date].append(item)
+
+        # Render expander for each date
+        for rev_date, quizzes in grouped_history.items():
+            day_avg = int(sum([q.get("accuracy", 0) for q in quizzes]) / len(quizzes)) if quizzes else 0
+            
+            with st.expander(f"🗓️ **Date: {rev_date}** — ({len(quizzes)} Quizzes Attempted | Avg: {day_avg}%)"):
+                for q_idx, q_data in enumerate(quizzes, 1):
+                    topic = q_data.get("topic_name", q_data.get("topic", f"Quiz Session #{q_idx}"))
+                    score = q_data.get("accuracy", q_data.get("score", 0))
+                    
+                    st.write(f"📌 **Topic:** `{topic}`")
+                    st.write(f"**Score:** {score}%")
+                    st.progress(score / 100)
+                    st.caption("---")
+    else:
+        st.info("💡 **No real quiz entries logged yet.** Complete a quiz today to populate your live revision history!")

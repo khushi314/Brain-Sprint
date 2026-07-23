@@ -144,19 +144,28 @@ def get_quiz_accuracies():
     
 
 def update_reminder_time(new_time_str):
-    conn = get_connection
-    cursor = conn.cursor
-    cursor.execute("SELECT id FROM user_settings LIMIT 1;")
-    row = cursor.fetchone()
+    import streamlit as st
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        #check data exists or not in table
+        cursor.execute("SELECT id FROM user_settings LIMIT 1;")
+        row = cursor.fetchone()
 
-    if row:
-        cursor.execute("UPDATE user_settings SET reminder_time = %s WHERE id = %s;", (new_time_str,row[0]))
-    else:
-        cursor.execute("INSERT INTO user_settings(reminder_time) VALUES (%S);", (new_time_str,))    
-
-        conn.commit()
-        cursor.close()
-        conn.close()   
+        if row:
+            #if data exists then update 
+            cursor.execute("UPDATE user_settings SET remainder_time = %s  WHERE id = %s;",(new_time_str,row[0]))
+        else:
+            #if table is empty then insert
+            cursor.execute("INSERT INTO user_settings(remainder_time) VALUES (%s);", (new_time_str,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+    except Exception as e:
+        st.error(f"database error: {e}")
+        return False        
+    
 
 
 def get_reminder_time():

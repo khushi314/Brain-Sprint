@@ -25,18 +25,24 @@ def check_and_send_email_reminders():
     # 3. Connect to Neon Database to find due tasks
     conn = db.get_connection()
     cursor = conn.cursor()
-    query = """
-        SELECT topic_name, stage FROM revisions 
-        WHERE ((date_1_day = %s) OR (date_7_day = %s) OR (date_30_day = %s)) 
-        AND current_status = 'Active';
+# --- EMAIL DATA FETCH SECTION ---
+# This query checks which topic is scheduled for which revision cycle (stage)
+    query ="""
+    SELECT topic_name, stage 
+    FROM revisions 
+    WHERE current_status = 'Active'
+    AND (
+        (stage = 'General Mode' AND DATE(created_at) = CURRENT_DATE)
+        OR (stage = 'Yesterday Setup' AND DATE(created_at) = CURRENT_DATE - INTERVAL '1 day')
+        OR (stage = '7 Days Prior Setup' AND DATE(created_at) = CURRENT_DATE - INTERVAL '7 days')
+    );
     """
-    cursor.execute(query, (today_str, today_str, today_str))
-    due_topics = cursor.fetchall()
-    
+    cursor.execute(query)
+    topics = cursor.fetchall()
     cursor.close()
     conn.close()
-    
-    if not due_topics:
+
+    if not topics:
         print("✅ No revisions scheduled for today.")
         return
         
@@ -55,7 +61,7 @@ def check_and_send_email_reminders():
     msg['Subject'] = "🧠 BrainSprint: Daily Spaced Revision Alert!"
     
     body = "🧠 BrainSprint Daily Spaced Revision Alert! 🧠\n\n"
-    for topic, stage in due_topics:
+    for topic, stage in topics:
         body += f"📌 Topic: {topic}\n⏳ Stage: {stage}\n\n"
     body += "🚀 Log in to your app dashboard, complete the quiz arena and smash your daily target, Buddy!"
     
