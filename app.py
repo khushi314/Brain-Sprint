@@ -158,7 +158,82 @@ if page == "🏠 Home Dashboard":
 elif page == "📅 Remainder Matrix":
     st.markdown("<h2 style='color: #00f0ff; font-weight:900;'>📅 Spaced Revision Remainder Architecture</h2>", unsafe_allow_html=True)
     st.divider()
-    
+
+
+# =========================================================================
+    # 🎨 ACTIVE RECALL LAB (DESIGNER HEAD APPROVED CLEAN CANVAS)
+    # =========================================================================
+    st.markdown("""
+        <style>
+        /* Circular Styling for Ink Color Picker */
+        div[data-testid="stColorPicker"] > div {
+            border-radius: 50% !important;
+            width: 42px !important;
+            height: 42px !important;
+            border: 2px solid #00feff !important;
+            box-shadow: 0px 0px 10px rgba(0, 254, 255, 0.4) !important;
+            overflow: hidden !important;
+        }
+        div[data-testid="stColorPicker"] input {
+            border-radius: 50% !important;
+            cursor: pointer !important;
+        }
+        
+        /* High-Contrast Labels */
+        div[data-testid="stRadio"] label {
+            font-weight: 700 !important;
+            color: #00feff !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    with st.expander("✨ 🧠 ACTIVE RECALL LAB: Self-Test Scratchpad & Canvas", expanded=False):
+        st.markdown(
+            """
+            <div style="background: linear-gradient(135deg, rgba(0, 254, 255, 0.12), rgba(255, 0, 127, 0.12)); border: 1.5px solid #00feff; padding: 14px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 12px rgba(0, 254, 255, 0.15);">
+                <h3 style="color: #00feff; font-weight: 800; margin: 0; font-size: 18px; text-shadow: 0 0 8px rgba(0, 254, 255, 0.5);">
+                    🎨 FOCUS SCRIBBLE & ACTIVE RECALL ZONE
+                </h3>
+                <p style="color: #cbd5e1; font-size: 13px; margin: 4px 0 0 0;">
+                    Draft rough formulas, recall theory, or solve quick steps while your timer runs. 
+                    <span style="color: #ff007f; font-weight: bold;">(Temporary Workspace)</span>
+                </p>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+        
+        pad_mode = st.radio("⚡ SELECT WORKSPACE INSTRUMENT:", ["🖊️ Digital Canvas (Formula Scribble)", "⌨️ Text Notepad (Theory Draft)"], horizontal=True, key="master_pad_mode")
+        
+        if pad_mode == "⌨️ Text Notepad (Theory Draft)":
+            st.text_area("✍️ JOT DOWN CONCEPTS FROM MEMORY:", height=170, placeholder="Type key formulas, bullet points, or definitions here...", key="master_text_recall")
+        else:
+            try:
+                from streamlit_drawable_canvas import st_canvas
+                
+                st.markdown("<p style='color: #ff007f; font-weight: 800; font-size: 14px; margin-bottom: 6px;'>🖌️ BRUSH & COLOR CUSTOMIZATION</p>", unsafe_allow_html=True)
+                col_ctrl1, col_ctrl2 = st.columns([1, 3])
+                
+                with col_ctrl1:
+                    canvas_color = st.color_picker("Choose Ink Color", "#00feff", key="master_pen_col")
+                with col_ctrl2:
+                    canvas_size = st.slider("Pen Thickness", 1, 15, 3, key="master_pen_sz")
+                
+                # Full-Width Dark Background Canvas
+                st_canvas(
+                    stroke_width=canvas_size,
+                    stroke_color=canvas_color,
+                    background_color="#12121e",  # Seamless Dark Surface
+                    height=240,
+                    width=700,                  # Fills the container smoothly
+                    drawing_mode="freedraw",
+                    key="master_recall_canvas",
+                )
+            except Exception as e:
+                st.error("⚠️ Canvas loading error.")
+
+    st.divider()
+
     col_rem_left, col_rem_right = st.columns([5, 4])
     
     with col_rem_left:
@@ -166,6 +241,57 @@ elif page == "📅 Remainder Matrix":
             st.session_state.active_timer_key = None
         if "timer_secs_left" not in st.session_state:
             st.session_state.timer_secs_left = 0
+
+    # --- TOP-RIGHT FLOATING ALARM CLOCK WIDGET ---
+    if st.session_state.active_timer_key and st.session_state.timer_secs_left > 0:
+        m_top, s_top = divmod(st.session_state.timer_secs_left, 60)
+        timer_labels = {
+            "c_10": "10-Min Focus",
+            "c_15_1": "15-Min Focus",
+            "c_15_2": "15-Min Master"
+        }
+        current_label = timer_labels.get(st.session_state.active_timer_key, "Timer")
+        
+        st.markdown(f"""
+            <style>
+            .floating-alarm-clock {{
+                position: fixed;
+                top: 75px;
+                right: 35px;
+                z-index: 99999;
+                background: linear-gradient(135deg, rgba(10, 10, 20, 0.95), rgba(20, 20, 35, 0.95));
+                border: 2px solid #00feff;
+                box-shadow: 0px 0px 20px rgba(0, 254, 255, 0.5), inset 0px 0px 10px rgba(255, 0, 127, 0.3);
+                border-radius: 15px;
+                padding: 10px 18px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                backdrop-filter: blur(8px);
+            }}
+            .clock-digits {{
+                font-family: monospace;
+                font-size: 22px;
+                font-weight: 900;
+                color: #00feff;
+                margin: 0;
+            }}
+            .clock-subtext {{
+                font-size: 10px;
+                color: #ff007f;
+                font-weight: bold;
+                margin: 0;
+            }}
+            </style>
+            
+            <div class="floating-alarm-clock">
+                <div style="font-size: 24px;">⏰</div>
+                <div>
+                    <p class="clock-subtext">🚨 {current_label}</p>
+                    <p class="clock-digits">{m_top:02d}:{s_top:02d}</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)    
 
     # # Stage 1 Card
     s1_val = st.session_state.stored_yesterday if st.session_state.stored_yesterday else "No topic due for 24h revision today."
@@ -328,21 +454,18 @@ elif page == "📝 Quiz Arena":
                 st.session_state.quiz_results_show = True
                 st.rerun()
 
-    # ---- EVALUATION REPORT DISPLAY BLOCK ----
-if st.session_state.get("quiz_results_show", False):
-    correct_count = 0
-    st.markdown("### 📊 Your Quiz Evaluation Report")
-
-    # Clean display without confusing 'You chose' state mismatches
-    for i, q_item in enumerate(st.session_state.quiz_questions):
-        q_text = q_item.get("question", "")
-        actual_ans = q_item.get("answer") or q_item.get("correct_answer") or ""
-        explanation = q_item.get("explanation", q_item.get("description", "Review the core concepts."))
-
-        st.write(f"**Q{i+1}: {q_text}**")
-        st.info(f"💡 **Correct Choice:** {actual_ans}")
-        st.caption(f"📖 *Quick Revision Theory:* {explanation}")
-        st.markdown("---")
+       # ---- EVALUATION REPORT DISPLAY BLOCK ----
+        if st.session_state.get("quiz_results_show", False):
+            correct_count = 0 
+            st.markdown("### 📊 Your Quiz Evaluation Report")
+            for i, q_item in enumerate(st.session_state.quiz_questions):
+                q_text = q_item.get("question", "")
+                actual_ans = q_item.get("answer") or q_item.get("correct_answer") or ""
+                explanation = q_item.get("explanation", q_item.get("description", "Review the core concepts."))
+                st.write(f"**Q{i+1}: {q_text}**")
+                st.info(f"💡 **Correct Choice:** {actual_ans}")
+                st.caption(f"📖 *Quick Revision Theory:* {explanation}")
+                st.markdown("---")
 
     # --- NEON CLOUD DATABASE SYNC ENGINE (4 Spaces) ---
     # Ek baar run hone ke baad hi loop database me push karega
