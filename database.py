@@ -141,30 +141,55 @@ def get_quiz_accuracies():
         return accuracies if accuracies else [0] # Agar data na ho to [0] return karega
     except Exception:
         return [0]   
-    
 
 def update_reminder_time(new_time_str):
     import streamlit as st
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        #check data exists or not in table
+        
+        # Check data exists or not in table
         cursor.execute("SELECT id FROM user_settings LIMIT 1;")
         row = cursor.fetchone()
 
         if row:
-            #if data exists then update 
-            cursor.execute("UPDATE user_settings SET remainder_time = %s  WHERE id = %s;",(new_time_str,row[0]))
+            # If data exists then update
+            cursor.execute("UPDATE user_settings SET remainder_time = %s WHERE id = %s;", (new_time_str, row[0]))
         else:
-            #if table is empty then insert
+            # If table is empty then insert
             cursor.execute("INSERT INTO user_settings(remainder_time) VALUES (%s);", (new_time_str,))
-            conn.commit()
-            cursor.close()
-            conn.close()
-            return True
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+
     except Exception as e:
         st.error(f"database error: {e}")
-        return False        
+        return False    
+
+# def update_reminder_time(new_time_str):
+#     import streamlit as st
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         #check data exists or not in table
+#         cursor.execute("SELECT id FROM user_settings LIMIT 1;")
+#         row = cursor.fetchone()
+
+#         if row:
+#             #if data exists then update 
+#             cursor.execute("UPDATE user_settings SET remainder_time = %s  WHERE id = %s;",(new_time_str,row[0]))
+#         else:
+#             #if table is empty then insert
+#             cursor.execute("INSERT INTO user_settings(remainder_time) VALUES (%s);", (new_time_str,))
+#          conn.commit()
+#          cursor.close()
+#          conn.close()
+#          return True    
+#     except Exception as e:
+#         st.error(f"database error: {e}")
+#         return False        
     
 
 

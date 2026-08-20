@@ -32,9 +32,9 @@ def check_and_send_email_reminders():
     FROM revisions 
     WHERE current_status = 'Active'
     AND (
-        (stage = 'General Mode' AND DATE(created_at) = CURRENT_DATE)
-        OR (stage = 'Yesterday Setup' AND DATE(created_at) = CURRENT_DATE - INTERVAL '1 day')
-        OR (stage = '7 Days Prior Setup' AND DATE(created_at) = CURRENT_DATE - INTERVAL '7 days')
+        (date_1_day = CURRENT_DATE)
+        OR (date_7_day = CURRENT_DATE)
+        OR (date_30_day = CURRENT_DATE)
     );
     """
     cursor.execute(query)

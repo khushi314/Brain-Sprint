@@ -114,23 +114,42 @@ if page == "🏠 Home Dashboard":
             inp_7days = st.text_input("📅 Enter topic covered 7 days earlier:", value=st.session_state.stored_7day, placeholder="e.g., Queue Protocols")
                     
             
-            
-            
-            rem_clock = st.time_input("🔔 Permanent Reminder Trigger Clock Slot:", datetime.time(20, 0))
-            if rem_clock:
+            current_db_time = db.get_reminder_time()
+            try:
+                h, m = map(int, current_db_time.split(":"))
+                default_val = datetime.time(h, m)
+            except Exception:
+                default_val = datetime.time(20, 0)
+
+    
+            rem_clock = st.time_input("🔔 Permanent Reminder Trigger Clock Slot:", value=default_val)
+            formatted_time = rem_clock.strftime("%H:%M")
+            st.caption(f"cloud synced:reminders active for hour {formatted_time} IST")
+
+        # 3. Sync Button
+            sync_trigger = st.button("Sync Data & Activate Timeline ⚡", use_container_width=True, type="primary", key="home_sync_btn")
+
+            if sync_trigger:
                 try:
-                    formatted_time = rem_clock.strftime("%H:%M")
                     db.update_reminder_time(formatted_time)
-                    st.caption(f"cloud synced:reminders active for hour {formatted_time} IST")
+                    #st.success(f"✨ data synced successfully")
+                except Exception as db_err:
+                    st.error(f"Cloud sync failed: {db_err}")
+            # rem_clock = st.time_input("🔔 Permanent Reminder Trigger Clock Slot:", datetime.time(20, 0))
+            # if rem_clock:
+            #     try:
+            #         formatted_time = rem_clock.strftime("%H:%M")
+            #         db.update_reminder_time(formatted_time)
+            #         st.caption(f"cloud synced:reminders active for hour {formatted_time} IST")
                     
         
-                except Exception as db_err:
-                    st.caption(f"Cloud sync pending....({db_err})")
+            #     except Exception as db_err:
+            #         st.caption(f"Cloud sync pending....({db_err})")
 
 
 
-            sync_trigger = st.button("Sync Data & Activate Timeline ⚡", use_container_width=True, type="primary")
-            st.markdown('</div>', unsafe_allow_html=True)
+            # sync_trigger = st.button("Sync Data & Activate Timeline ⚡", use_container_width=True, type="primary", key="home_sync_btn")
+            # st.markdown('</div>', unsafe_allow_html=True)
         
         if sync_trigger:
             st.session_state.stored_today = inp_today
@@ -142,7 +161,7 @@ if page == "🏠 Home Dashboard":
                 if inp_today: db.add_topic(inp_today, "General Mode")
                 if inp_yesterday: db.add_topic(inp_yesterday, "Yesterday Setup", base_date=datetime.datetime.now() - datetime.timedelta(days=1))
                 if inp_7days: db.add_topic(inp_7days, "7 Days Prior Setup", base_date=datetime.datetime.now() - datetime.timedelta(days=7))
-                st.success("✨ Flash Engine Sync Complete! Real data successfully logged via database.py")
+                st.success("✨ data synced successfully")
             except Exception as e:
                 st.error(f"Database Write Error: {e}. Please ensure database.py host setup is active!")
 
