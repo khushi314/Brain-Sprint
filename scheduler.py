@@ -5,6 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import database as db
+import sys
 
 def check_and_send_email_reminders():
     # 1. Timezone configurations (IST Check)
@@ -80,3 +81,5 @@ def check_and_send_email_reminders():
 
 if __name__ == "__main__":
     check_and_send_email_reminders()
+    print("Execution finished successfully.Exiting now.")
+    sys.exit(0)
