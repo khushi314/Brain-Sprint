@@ -136,9 +136,9 @@ def get_quiz_accuracies():
         cursor.close()
         conn.close()
         
-        # Data ko simple python list [80, 90, 70] me convert karega
+        
         accuracies = [row[0] for row in rows]
-        return accuracies if accuracies else [0] # Agar data na ho to [0] return karega
+        return accuracies if accuracies else [0] 
     except Exception:
         return [0]   
 

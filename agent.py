@@ -1,11 +1,13 @@
 import os                           #built-i library of python,used to intract with system environmental variable
 import json                         #to parse(decode) and stringify(encode) json data
 from google import genai            #new google genai SDK to access gemini models
-from google.genai import types      #used to define and configure different different data types of API
+from google.genai import types 
+import streamlit as st                #used to define and configure different different data types of API
 
 #initialise the gemini client
 #it automatically picks up the GEMINI_API_KEY from environment variables
-client = genai.Client()
+api_key =st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
 
 def generate_quiz(topic_name: str, num_questions: int, subject: str = "General"):
     #docstring which shows the purpose of function

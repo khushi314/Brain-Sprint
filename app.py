@@ -168,8 +168,7 @@ if page == "🏠 Home Dashboard":
     with col_home_left:
         st.write("")
         st.divider()
-        st.markdown("#### 🎥 Application Operational Guidance Video")
-        st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        
 
 # ==========================================
 # 📅 PAGE 2: REMAINDER MATRIX PAGE
@@ -385,6 +384,10 @@ elif page == "📅 Remainder Matrix":
 # 📝 PAGE 3: QUIZ ARENA (🚀 REAL AI CALL INTEGRATION)
 # ==========================================
 elif page == "📝 Quiz Arena":
+    if "correct_count" not in st.session_state:
+        st.session_state["correct_count"] = 0
+        correct_count = st.session_state.get("correct_count" , 0)
+
     st.markdown("<h2 style='color: #ff007f; font-weight:900;'>📝 AI Active Recall Quiz Arena</h2>", unsafe_allow_html=True)
     st.divider()
     
@@ -487,24 +490,29 @@ elif page == "📝 Quiz Arena":
                 st.markdown("---")
 
     # --- NEON CLOUD DATABASE SYNC ENGINE (4 Spaces) ---
-    # Ek baar run hone ke baad hi loop database me push karega
+    
     if not st.session_state.get("db_synced_this_run", False):
+        # Pehle variable ko safely retrieve/define karein
+        correct_count = st.session_state.get("correct_count", 0)
+
         try:
-            db.log_progress(target_q_topic, correct_count, len(st.session_state.quiz_questions))
+            total_q = len(st.session_state.get("quiz_questions", []))
+            #db.log_progress(target_q_topic, correct_count, total_q)
+            
+
 
             if "quiz_accuracy_vector" not in st.session_state:
-                st.session_state.quiz_accuracy_vector = []
+                st.session_state["quiz_accuracy_vector"] = []
 
-            current_acc = int((correct_count / len(st.session_state.quiz_questions)) * 100)
-            st.session_state.quiz_accuracy_vector.append(current_acc)
+            if total_q > 0:
+                current_acc = int((correct_count / total_q) * 100)
+            else:
+                current_acc = 0
 
-            st.session_state.db_synced_this_run = True
-            st.success("🎯 Exam Submitted & Performance Synced with Neon Cloud!")
-            st.rerun()
+            st.session_state["quiz_accuracy_vector"].append(current_acc)
 
         except Exception as log_error:
             st.warning(f"Sync Notice: Graph cached in temporary session memory ({log_error})")
-    
 # ==========================================
 # 📈 PERFORMANCE TRACKER VIEW
 # ==========================================
